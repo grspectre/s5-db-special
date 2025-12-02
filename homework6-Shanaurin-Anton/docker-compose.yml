@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Переменные окружения для доступа к БД
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      MONGO_DB: myapp
+    depends_on:
+      - postgres
+      - mongo
+
+  postgres:
+    image: postgres:16
+    container_name: my_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Можно также монтировать директорию для бэкапов
+      # - ./backups/postgres:/backups/postgres
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo:7
+    container_name: my_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongo_data:/data/db
+      # - ./backups/mongo:/backups/mongo
+    ports:
+      - "27017:27017"
+
+volumes:
+  postgres_data:
+  mongo_data:
